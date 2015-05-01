@@ -46,6 +46,9 @@ def finish(folderName):
 	aggregated = corrected.groupby(['Medium','Strain']).aggregate(['mean'])
 	aggregated.to_csv(os.path.join(folderName, "output_table_corr_by_strain_medium.csv"), sep='\t')
 
+	#generate count file
+	count = corrected[['Medium','Strain','Plate','Coordinate']].groupby(['Medium','Strain']).aggregate(['count']);
+	count.to_csv(os.path.join(folderName,"output_count.csv"), sep='\t');
 
 	# generate global result file
 	correctedColumns = list(map(lambda x:"Cor_"+str(x), list(range(1,49))))
