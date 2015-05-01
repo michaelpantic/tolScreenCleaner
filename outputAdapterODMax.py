@@ -29,7 +29,7 @@ def finish(folderName):
 	dataFrameBlanks.set_index(['Plate','Medium']);
 	dataFrameBlanks[["Medium"]+(list(range(1,49)))].groupby(['Medium']).aggregate(['mean','std']).to_csv(os.path.join(folderName, "output_blanks.csv"), sep = '\t');
 
-	#correct for blank by plate
+	#correct for blank by medium
 	corrected = dataFrameNonBlanks.apply(correctForBlank,axis=1,args=[dataFrameBlanks])
 
 	#select only non-mcpsm for next step
@@ -72,16 +72,16 @@ def finish(folderName):
 	return 0
 
 def correctForBlank(row, dataFrameBlanks):
-	plate = row['Plate']
+	
 	medium = row['Medium']
 	
 	#get corresponding blanks
-	df=dataFrameBlanks.loc[(dataFrameBlanks['Plate'] == plate) &(dataFrameBlanks['Medium']==medium)]
+	df=dataFrameBlanks.loc[(dataFrameBlanks['Medium']==medium)]
 	blankMean=df[list(range(0,52))].mean()
 	numBlanks = len(df.index)
 	
 	if numBlanks == 0:
-		print("ERROR NO BLANKS FOUND FOR "+plate+"/"+medium)
+		print("ERROR NO BLANKS FOUND FOR "+medium)
 	
 	#attach corrected data!
 	row['NumberBlanks'] = len(df.index);
