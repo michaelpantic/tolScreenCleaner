@@ -37,7 +37,7 @@ def finish(folderName):
 	dataFrameMedia.set_index(['Plate','Medium','Strain'])
 
 	#correct for medium (positive test)
-	corrected = corrected.loc[corrected['Medium'] != 'MCPSM']
+#	corrected = corrected.loc[corrected['Medium'] != 'MCPSM']
 	corrected = corrected.apply(correctForMedium,axis=1,args=[dataFrameMedia])
 
 	corrected.to_csv(os.path.join(folderName, "output_table.csv"),sep='\t')
@@ -102,7 +102,9 @@ def correctForMedium(row, dataFrameMedia):
 	
 	
 	df=dataFrameMedia.loc[(dataFrameMedia['Strain']==strain) & (dataFrameMedia['Medium']==medium)]
-	mediaMean=df[list(range(0,52))].mean()
+	correctedColumns = list(map(lambda x:"Cor_"+str(x), list(range(1,49))))
+	
+	mediaMean=df[["Plate","Strain"]+correctedColumns].mean()
 		
 	numPosTests = len(df.index)
 	
@@ -115,7 +117,7 @@ def correctForMedium(row, dataFrameMedia):
 		if(numPosTests == 0):
 			row['PosTest_'+str(x)] = 0
 		else:
-			row['PosTest_'+str(x)] = mediaMean[x]
+			row['PosTest_'+str(x)] = mediaMean['Cor_'+str(x)]
 
 
 	return row
