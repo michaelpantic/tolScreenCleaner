@@ -1,16 +1,19 @@
 import csv
 import numpy
 import pandas
+import os
 aggregatedData = []
 
-def createOutputFile(name):
-	return [name]
+def createOutputFile(folderName):
+	return folderName
 
-def outputPlateData(plate, outputInfo):
+def outputPlateData(plate, folderName):
 	aggregatedData.extend([[plate.Name]+t.ToTable() for t in plate.DataArray]);
 	return 0
 
-def finish(outputInfo):
+
+
+def finish(folderName):
 
 	# read data
 	dataFrame = pandas.DataFrame(aggregatedData, columns=['Plate','Coordinate','Medium','Strain']+list(range(1,49)))
@@ -24,7 +27,7 @@ def finish(outputInfo):
 
 	dataFrameBlanks = dataFrame.loc[dataFrame['Strain'] == 'BLANK']
 	dataFrameBlanks.set_index(['Plate','Medium']);
-	dataFrameBlanks[["Medium"]+(list(range(1,49)))].groupby(['Medium']).aggregate(['mean','std']).to_csv("../OUTPUT/output_blanks.csv");
+	dataFrameBlanks[["Medium"]+(list(range(1,49)))].groupby(['Medium']).aggregate(['mean','std']).to_csv(os.path.join(folderName, "output_blanks.csv"), sep = '\t');
 
 	#correct for blank by plate
 	corrected = dataFrameNonBlanks.apply(correctForBlank,axis=1,args=[dataFrameBlanks])
@@ -37,11 +40,11 @@ def finish(outputInfo):
 	corrected = corrected.loc[corrected['Medium'] != 'MCPSM']
 	corrected = corrected.apply(correctForMedium,axis=1,args=[dataFrameMedia])
 
-	corrected.to_csv("../OUTPUT/output_table.csv",sep='\t')
+	corrected.to_csv(os.path.join(folderName, "output_table.csv"),sep='\t')
 
 	# generate aggregated by experiment file
 	aggregated = corrected.groupby(['Medium','Strain']).aggregate(['mean'])
-	aggregated.to_csv("../OUTPUT/output_table_corr_by_strain_medium.csv", sep='\t')
+	aggregated.to_csv(os.path.join(folderName, "output_table_corr_by_strain_medium.csv"), sep='\t')
 
 
 	# generate global result file
@@ -50,9 +53,12 @@ def finish(outputInfo):
 
 	corrected["MaxCorOD"] = corrected[correctedColumns].max(axis=1);
 	corrected["MaxPosTestOD"] = corrected[posTestColumns].max(axis=1);
-	corrected[["Medium","MaxCorOD","MaxPosTestOD"]].groupby(["Medium"]).aggregate(['mean','std']).to_csv("../OUTPUT/output_conclusion_by_medium.csv");
-	corrected[["Medium","Strain","MaxCorOD","MaxPosTestOD"]].groupby(["Strain","Medium"]).aggregate(['mean','std']).to_csv("../OUTPUT/output_conclusion_by_strain_medium.csv");
-	corrected[["Strain","MaxCorOD","MaxPosTestOD"]].groupby(["Strain"]).aggregate(['mean','std']).to_csv("../OUTPUT/output_conclusion_by_strain.csv");
+
+	corrected[["Medium","MaxCorOD","MaxPosTestOD"]].groupby(["Medium"]).aggregate(['mean','std']).to_csv(os.path.join(folderName,"output_conclusion_by_medium.csv"), sep='\t');
+
+	corrected[["Medium","Strain","MaxCorOD","MaxPosTestOD"]].groupby(["Strain","Medium"]).aggregate(['mean','std']).to_csv(os.path.join(folderName,"output_conclusion_by_strain_medium.csv"), sep='\t');
+
+	corrected[["Strain","MaxCorOD","MaxPosTestOD"]].groupby(["Strain"]).aggregate(['mean','std']).to_csv(os.path.join(folderName, "output_conclusion_by_strain.csv"), sep='\t');
 
 
 	

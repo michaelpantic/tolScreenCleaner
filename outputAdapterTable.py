@@ -1,7 +1,8 @@
 import csv
+import os
 
-def createOutputFile(name):
-	csvFile = open(name, 'w');	#not so clean (ressource deletion not possible...)
+def createOutputFile(outputFolder):
+	csvFile = open(os.path.join(outputFolder,"table.csv"), 'w');	#not so clean (ressource deletion not possible...)
 	return [csvFile, csv.writer(csvFile,delimiter='\t', quotechar='"', quoting=csv.QUOTE_MINIMAL)]
 
 def outputPlateData(plate, outputInfo):

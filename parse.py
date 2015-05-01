@@ -7,8 +7,9 @@ import outputAdapterODMax
 from os import listdir
 from os.path import isfile, join
 
-indexFolder = "../INDEX"
-platesFolder = "../PLATES"
+indexFolder = "../tolScreenCleanerData/INDEX"
+platesFolder = "../tolScreenCleanerData/PLATES"
+outputFolder = "../tolScreenCleanerData/OUTPUT"
 
 # Get available index files
 indexFilesH = [ join(indexFolder,f) for f in listdir(indexFolder) if isfile(join(indexFolder,f)) and re.match("H.+.txt",f)]
@@ -27,8 +28,8 @@ print('Found ' + str(len(plates)) + ' different plates:')
 for plate in plates:
 	print ("\t",plate)
 
-outputInfoTable = outputAdapterTable.createOutputFile('../OUTPUT/output_table.csv');
-outputInfoODMax = outputAdapterODMax.createOutputFile('../OUTPUT/output_analysis.csv');
+outputInfoTable = outputAdapterTable.createOutputFile(outputFolder);
+outputInfoODMax = outputAdapterODMax.createOutputFile(outputFolder);
 
 # go trough found Plates
 for plate in plates:
