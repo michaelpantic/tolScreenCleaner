@@ -2,6 +2,13 @@ import csv
 import numpy
 import pandas
 import os
+import matplotlib
+matplotlib.use('PDF')
+
+
+from matplotlib.colors import ListedColormap
+import matplotlib.pyplot as plt
+
 aggregatedData = []
 
 def createOutputFile(folderName):
@@ -65,7 +72,7 @@ def finish(folderName):
 
 
 	
-	
+	plotData(aggregated, folderName)
 	
 
 #grouped = dataFrameNonBlanks[['Strain','Medium','ODMax']].groupby(['Strain','Medium']).aggregate(['max','min','mean','std','count'])
@@ -124,3 +131,34 @@ def correctForMedium(row, dataFrameMedia):
 
 
 	return row
+
+
+def plotData(df, folderName):
+	df=df.reset_index()
+	correctedColumns = list(map(lambda x:"Cor_"+str(x), list(range(1,49))))
+
+	allMedia = df["Medium"].unique();
+
+	for medium in allMedia:
+
+		# one dataFrame per Medium with only the corrected timeseries
+		dfMedium = df[correctedColumns].loc[(df['Medium'] == medium)];
+		dfMediumT  = dfMedium.T.rename(columns=lambda x:df["Strain"][x]);
+	
+		# get list of end OD
+		#dfEndOD = df[["Strain","Cor_48"]].sort("Cor_48");
+		#print(dfEndOD)
+
+		#generate colormap
+		#numEntries = len(dfMedium.index)
+		#colorMap = ListedColormap(["red"]+ ["gray"]*(numEntries-1),"test");
+		
+	
+
+		ax = dfMediumT.plot(legend = "Strain", title = "OD in "+medium,colormap="gist_ncar")
+		ax.set_xlabel("Time 0-48h")
+		ax.set_ylabel("OD")
+		plt.savefig(os.path.join(folderName,medium+".pdf"))	
+
+
+	return 0
